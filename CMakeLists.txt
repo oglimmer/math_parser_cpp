@@ -17,7 +17,7 @@ endif()
 add_library(${project_name}-lib
         src/characterType.cpp
         src/LexicalAnalyzer.cpp
-        )
+        src/ASTBuilder.cpp src/ASTBuilder.hpp src/FunctionParser.cpp src/FunctionParser.hpp)
 
 target_link_libraries(${project_name}-lib
         PUBLIC doctest::doctest

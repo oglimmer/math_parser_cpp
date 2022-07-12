@@ -5,6 +5,7 @@
 
 #include "characterType.cpp"
 #include "LexicalAnalyzer.hpp"
+#include "FunctionParser.hpp"
 
 TEST_CASE("testing functions") {
     CHECK(isBracket('(') == true);
@@ -90,4 +91,10 @@ TEST_CASE("testing LexicalAnalyzer - addition with multiple decimals") {
     CHECK(tokensToTest->at(1)->getData() == "+");
     CHECK(tokensToTest->at(2)->getData() == "123.89");
     CHECK(tokensToTest->size() == 3);
+}
+
+TEST_CASE("testing FunctionParser - decimal addition and subtraction") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("34.56+123.89-32.75");
+    CHECK(result == 125.69999999999999);
 }

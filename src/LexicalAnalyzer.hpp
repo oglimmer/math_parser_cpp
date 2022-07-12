@@ -7,24 +7,26 @@
 #include <memory>
 
 #include "characterType.hpp"
+#include "ASTBuilder.hpp"
 
 enum TokenType {
     NUMBER, OPERATOR
 };
 
+class ASTNode;
+
 class Token {
-private: 
+private:
     std::string data;
     TokenType tokenType;
 public:
-    Token(const std::string& data, TokenType tokenType) : data(data), tokenType(tokenType) {}
+    Token(const std::string &data, TokenType tokenType);
 
-    const std::string& getData() {
-        return data;
-    }
-    TokenType getTokenType() {
-        return tokenType;
-    }
+    const std::string &getData();
+
+    TokenType getTokenType();
+
+    std::shared_ptr<ASTNode> toASTNode();
 };
 
 class InvalidFormulaException : public std::exception {
@@ -52,14 +54,14 @@ class Transition {
 
 
 class State : public std::enable_shared_from_this<State> {
-    
+
     public:
         virtual void validate(char readCharacter, char nextCharacter) = 0;
 
         virtual std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter) = 0;
-    
+
         virtual std::shared_ptr<Token> getToken() = 0;
-        
+
         std::shared_ptr<Transition> getTransition();
 };
 
@@ -69,11 +71,11 @@ class DigitReadingState : public State {
         std::stringstream numberBuffer;
     public:
         DigitReadingState(char initialDigit);
-        
+
         void validate(char readCharacter, char nextCharacter);
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
-        
+
         std::shared_ptr<Token> getToken();
 
 };
@@ -86,7 +88,7 @@ class DigitCompleteState : public State {
         void validate(char readCharacter, char nextCharacter);
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
-        
+
         std::shared_ptr<Token> getToken();
 
 };
@@ -96,11 +98,11 @@ class OperatorState : public State {
         char symbol;
     public:
         OperatorState(char symbol);
-        
+
         void validate(char readCharacter, char nextCharacter);
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
-        
+
         std::shared_ptr<Token> getToken();
 
 };
@@ -110,7 +112,7 @@ class EmptyState : public State {
         void validate(char readCharacter, char nextCharacter);
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
-        
+
         std::shared_ptr<Token> getToken();
 };
 
