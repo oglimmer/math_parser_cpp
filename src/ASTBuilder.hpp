@@ -9,6 +9,7 @@ class Operation;
 
 class ASTNode {
 public:
+    virtual bool openForInput() = 0;
     virtual std::string toString() = 0;
 };
 
@@ -30,12 +31,15 @@ private:
     std::shared_ptr<Operation> op;
 public:
     BinaryOperationExpression(std::shared_ptr<Expression> op1, std::shared_ptr<Operation> op);
+    BinaryOperationExpression(std::shared_ptr<Expression> op1, std::shared_ptr<Operation> op, std::shared_ptr<Expression> op2);
 
     std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
 
     long double resolve();
 
     void validate();
+
+    bool openForInput();
 
     std::string toString();
 };
@@ -50,16 +54,23 @@ public:
 
     long double resolve();
 
+    bool openForInput();
+
     std::string toString();
 };
 
 class Operation : public ASTNode {
 private:
     char symbol;
+    int precedence;
 public:
     Operation(char symbol);
 
+    int getPrecedence() const;
+
     long double resolve(std::shared_ptr<Expression> op1, std::shared_ptr<Expression> op2);
+
+    bool openForInput();
 
     std::string toString();
 };

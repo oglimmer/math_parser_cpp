@@ -10,7 +10,7 @@ bool isNumber(char c) {
 }
 
 bool isOperator(char c) {
-    return c == '+' || c == '-' || c == '/' || c == '*';
+    return c == '+' || c == '-' || c == '/' || c == '*' || c == '^';
 }
 
 bool isAlgebraicSign(char c) {

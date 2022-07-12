@@ -98,3 +98,27 @@ TEST_CASE("testing FunctionParser - decimal addition and subtraction") {
     auto result = functionParser.parse("34.56+123.89-32.75");
     CHECK(result == 125.69999999999999);
 }
+
+TEST_CASE("testing FunctionParser - addition and multiplication") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("1+2*3");
+    CHECK(result == 7);
+}
+
+TEST_CASE("testing FunctionParser - multiplication and addition") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("2*3+1");
+    CHECK(result == 7);
+}
+
+TEST_CASE("testing FunctionParser - multiplication and division") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("4*3/2");
+    CHECK(result == 6);
+}
+
+TEST_CASE("testing FunctionParser - power") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("2*3^4");
+    CHECK(result == 162);
+}
