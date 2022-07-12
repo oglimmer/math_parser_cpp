@@ -8,6 +8,25 @@
 
 #include "characterType.hpp"
 
+enum TokenType {
+    NUMBER, OPERATOR
+};
+
+class Token {
+private: 
+    std::string data;
+    TokenType tokenType;
+public:
+    Token(const std::string& data, TokenType tokenType) : data(data), tokenType(tokenType) {}
+
+    const std::string& getData() {
+        return data;
+    }
+    TokenType getTokenType() {
+        return tokenType;
+    }
+};
+
 class InvalidFormulaException : public std::exception {
 private:
     std::string message_;
@@ -24,11 +43,11 @@ class State;
 class Transition {
     private:
         std::shared_ptr<State> targetState;
-        std::string token;
+        std::shared_ptr<Token> token;
     public:
-        Transition(std::shared_ptr<State> targetState, std::string token);
+        Transition(std::shared_ptr<State> targetState, std::shared_ptr<Token> token);
         std::shared_ptr<State> getTargetState();
-        std::string getToken();
+        std::shared_ptr<Token> getToken();
 };
 
 
@@ -39,7 +58,7 @@ class State : public std::enable_shared_from_this<State> {
 
         virtual std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter) = 0;
     
-        virtual std::string getToken() = 0;
+        virtual std::shared_ptr<Token> getToken() = 0;
         
         std::shared_ptr<Transition> getTransition();
 };
@@ -55,7 +74,7 @@ class DigitReadingState : public State {
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
         
-        std::string getToken();
+        std::shared_ptr<Token> getToken();
 
 };
 
@@ -63,12 +82,12 @@ class DigitCompleteState : public State {
     private:
         std::string number;
     public:
-        DigitCompleteState(std::string number);
+        DigitCompleteState(const std::string& number);
         void validate(char readCharacter, char nextCharacter);
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
         
-        std::string getToken();
+        std::shared_ptr<Token> getToken();
 
 };
 
@@ -82,7 +101,7 @@ class OperatorState : public State {
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
         
-        std::string getToken();
+        std::shared_ptr<Token> getToken();
 
 };
 
@@ -92,7 +111,7 @@ class EmptyState : public State {
 
         std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
         
-        std::string getToken();
+        std::shared_ptr<Token> getToken();
 };
 
 
@@ -102,13 +121,13 @@ class FSM {
         std::shared_ptr<State> state;
     public:
         FSM();
-        std::string transition(char readCharacter, char nextCharacter);
+        std::shared_ptr<Token> transition(char readCharacter, char nextCharacter);
 };
 
 class LexicalAnalyzer {
 
 public:
-    std::unique_ptr<std::vector<std::string>> parseToTokens(const std::string &input);
+    std::unique_ptr<std::vector<std::shared_ptr<Token>>> parseToTokens(const std::string &input);
 
 };
 

@@ -8,11 +8,12 @@ InvalidFormulaException::InvalidFormulaException(const std::string &message) : m
 }
 
 
-Transition::Transition(std::shared_ptr<State> targetState, std::string token) : token(token), targetState(targetState) {} 
+Transition::Transition(std::shared_ptr<State> targetState, std::shared_ptr<Token> token) : token(token), targetState(targetState) {} 
+
 std::shared_ptr<State> Transition::getTargetState() {
     return targetState;
 }
-std::string Transition::getToken() {
+std::shared_ptr<Token> Transition::getToken() {
     return token;
 }
 
@@ -21,6 +22,8 @@ std::string Transition::getToken() {
 std::shared_ptr<Transition> State::getTransition() {
     return std::make_shared<Transition>(shared_from_this(), getToken());
 }
+
+
 
 DigitReadingState::DigitReadingState(char initialDigit) {
     numberBuffer << initialDigit;
@@ -42,12 +45,12 @@ std::shared_ptr<Transition> DigitReadingState::transition(char readCharacter, ch
     return getTransition();
 }
 
-std::string DigitReadingState::getToken() {
-    return std::string();
+std::shared_ptr<Token> DigitReadingState::getToken() {
+    return nullptr;
 }
 
 
-DigitCompleteState::DigitCompleteState(std::string number) : number(number) {}
+DigitCompleteState::DigitCompleteState(const std::string& number) : number(number) {}
 void DigitCompleteState::validate(char readCharacter, char nextCharacter) {
    if(!isOperator(readCharacter)) {
        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
@@ -58,8 +61,8 @@ std::shared_ptr<Transition> DigitCompleteState::transition(char readCharacter, c
     return std::make_shared<OperatorState>(readCharacter)->getTransition();
 }
 
-std::string DigitCompleteState::getToken() {
-    return number;
+std::shared_ptr<Token> DigitCompleteState::getToken() {
+    return std::make_unique<Token>(number, TokenType::NUMBER);
 }
 
 
@@ -79,8 +82,8 @@ std::shared_ptr<Transition> OperatorState::transition(char readCharacter, char n
     }
 }
 
-std::string OperatorState::getToken() {
-    return std::string(1, symbol);
+std::shared_ptr<Token> OperatorState::getToken() {
+    return std::make_unique<Token>(std::string(1, symbol), TokenType::OPERATOR);
 }
 
 
@@ -99,8 +102,8 @@ std::shared_ptr<Transition> EmptyState::transition(char readCharacter, char next
     }
 }
 
-std::string EmptyState::getToken() {
-    return std::string();
+std::shared_ptr<Token> EmptyState::getToken() {
+    return nullptr;
 }
 
 
@@ -108,16 +111,15 @@ FSM::FSM() : state(std::make_shared<EmptyState>()) {
     
 }
 
-std::string FSM::transition(char readCharacter, char nextCharacter) {
+std::shared_ptr<Token> FSM::transition(char readCharacter, char nextCharacter) {
     state->validate(readCharacter, nextCharacter);
     auto transition = state->transition(readCharacter, nextCharacter);
     state = transition->getTargetState();
     return transition->getToken();
 }
 
-std::unique_ptr<std::vector<std::string>> LexicalAnalyzer::parseToTokens(const std::string &input) {
-    std::cout << "LexicalAnalyzer::parseToTokens IN" << "\n";
-    auto resultVector = std::make_unique<std::vector<std::string>>();
+std::unique_ptr<std::vector<std::shared_ptr<Token>>> LexicalAnalyzer::parseToTokens(const std::string &input) {
+    auto resultVector = std::make_unique<std::vector<std::shared_ptr<Token>>>();
     
    FSM fsm;
    
@@ -132,14 +134,11 @@ std::unique_ptr<std::vector<std::string>> LexicalAnalyzer::parseToTokens(const s
     
         
         auto token = fsm.transition(readCharacter, nextCharacter);
-        std::cout << "TOKEN: " << token << "\n";
-        
-        if(!token.empty()) {
+        if(token) {
+            std::cout << "TOKEN: " << token->getData() << "\n";
             resultVector->push_back(token);
         }   
         
     }
-    
-    std::cout << "LexicalAnalyzer::parseToTokens OUT" << "\n";
     return resultVector;
 }

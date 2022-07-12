@@ -17,11 +17,11 @@ int main(int argc, char *argv[]) {
     std::cout << "Input: " << input << std::endl;
 
     LexicalAnalyzer lexicalAnalyzer;
-    std::unique_ptr<std::vector<std::string>> tokens = lexicalAnalyzer.parseToTokens(input);
+    std::unique_ptr<std::vector<std::shared_ptr<Token>>> tokens = lexicalAnalyzer.parseToTokens(input);
 
     std::cout << "Tokens: ";
     for (auto i = tokens->begin(); i != tokens->end(); ++i) {
-        std::cout << *i << ',';
+        std::cout << (*i)->getData() << ',';
     }
     std::cout << std::endl;
 
