@@ -75,6 +75,53 @@ std::string Number::toString() {
 
 /* *************************************************************************************************** */
 
+Parenthesis::Parenthesis(char c) : c(c), closed(false) {
+}
+
+std::shared_ptr<Expression> Parenthesis::add(std::shared_ptr<ASTNode> toAdd) {
+    if (closed) {
+        auto toAddOp = std::dynamic_pointer_cast<Operation>(toAdd);
+        if (!toAddOp) {
+            // TODO: this must never happen. Error is actually LexicalAnalyzer.
+            throw new InvalidFormulaException("Missing opening (");
+        }
+        return std::make_shared<BinaryOperationExpression>(shared_from_this(), toAddOp);
+    }
+    if (!nestedExp) {
+        nestedExp = std::static_pointer_cast<Expression>(toAdd);
+    } else {
+        if (std::dynamic_pointer_cast<Parenthesis>(toAdd) && !nestedExp->openForInput()) {
+            closed = true;
+        } else {
+            nestedExp = nestedExp->add(toAdd);
+        }
+    }
+    return shared_from_this();
+}
+
+long double Parenthesis::resolve() {
+    return nestedExp->resolve();
+}
+
+bool Parenthesis::openForInput() {
+    return !closed;
+}
+
+void Parenthesis::validate() {
+    if (c == ')') {
+        throw new InvalidFormulaException("Missing opening (");
+    } else if (!closed) {
+        throw new InvalidFormulaException("Missing closing )");
+    }
+    nestedExp->validate();
+}
+
+std::string Parenthesis::toString() {
+    return "(" + nestedExp->toString() + ")";
+}
+
+/* *************************************************************************************************** */
+
 Operation::Operation(char symbol) : symbol(symbol) {
     switch (symbol) {
         case '+':

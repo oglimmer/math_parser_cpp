@@ -59,6 +59,28 @@ public:
     std::string toString();
 };
 
+#define PARENTHESIS_OPEN '('
+#define PARENTHESIS_CLOSED ')'
+
+class Parenthesis : public Expression, public std::enable_shared_from_this<Number> {
+private:
+    std::shared_ptr<Expression> nestedExp;
+    bool closed;
+    char c;
+public:
+    Parenthesis(char c);
+
+    std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
+
+    long double resolve();
+
+    bool openForInput();
+
+    void validate();
+
+    std::string toString();
+};
+
 class Operation : public ASTNode {
 private:
     char symbol;
