@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 
-#include "characterType.hpp"
 #include "LexicalAnalyzer.hpp"
 #include "FunctionParser.hpp"
 
