@@ -36,6 +36,10 @@ long double BinaryOperationExpression::resolve() {
     return op->resolve(op1, op2);
 }
 
+std::shared_ptr<Expression> BinaryOperationExpression::simplify() {
+    return shared_from_this();
+}
+
 void BinaryOperationExpression::validate() {
     if (!op2) {
         throw std::error_code();
@@ -63,6 +67,10 @@ std::shared_ptr<Expression> Number::add(std::shared_ptr<ASTNode> toAdd) {
 
 long double Number::resolve() {
     return val;
+}
+
+std::shared_ptr<Expression> Number::simplify() {
+    return shared_from_this();
 }
 
 bool Number::openForInput() {
@@ -101,6 +109,10 @@ std::shared_ptr<Expression> Parenthesis::add(std::shared_ptr<ASTNode> toAdd) {
 
 long double Parenthesis::resolve() {
     return nestedExp->resolve();
+}
+
+std::shared_ptr<Expression> Parenthesis::simplify() {
+    return nestedExp->simplify();
 }
 
 bool Parenthesis::openForInput() {
@@ -179,6 +191,7 @@ std::shared_ptr<Expression> ASTBuilder::tokensToExpression(std::vector<std::shar
             resultExp = resultExp->add(astNode);
         }
     }
-    return resultExp;
+    resultExp->validate();
+    return resultExp->simplify();
 }
 

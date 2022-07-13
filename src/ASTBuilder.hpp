@@ -19,6 +19,8 @@ public:
 
     virtual long double resolve() = 0;
 
+    virtual std::shared_ptr<Expression> simplify() = 0;
+
     virtual void validate() {
 
     }
@@ -37,6 +39,8 @@ public:
 
     long double resolve();
 
+    std::shared_ptr<Expression> simplify();
+
     void validate();
 
     bool openForInput();
@@ -53,6 +57,8 @@ public:
     std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
 
     long double resolve();
+
+    std::shared_ptr<Expression> simplify();
 
     bool openForInput();
 
@@ -73,6 +79,8 @@ public:
     std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
 
     long double resolve();
+
+    std::shared_ptr<Expression> simplify();
 
     bool openForInput();
 

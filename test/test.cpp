@@ -146,3 +146,9 @@ TEST_CASE("testing FunctionParser - parenthesis and addition and multiplication2
     auto result = functionParser.parse("3*(2+3)");
     CHECK(result == 15);
 }
+
+TEST_CASE("testing FunctionParser - double parenthesis and addition and multiplication") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("3*(2*(2+3)+3)");
+    CHECK(result == 39);
+}
