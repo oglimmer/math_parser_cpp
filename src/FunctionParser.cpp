@@ -2,8 +2,12 @@
 #include "FunctionParser.hpp"
 #include "LexicalAnalyzer.hpp"
 
-
 long double FunctionParser::parse(const std::string &input) {
+    std::map<std::string, long double> vars;
+    return parse(input, vars);
+}
+
+long double FunctionParser::parse(const std::string &input, std::map<std::string, long double> vars) {
     LexicalAnalyzer lexicalAnalyzer;
     std::unique_ptr<std::vector<std::shared_ptr<Token>>> tokens = lexicalAnalyzer.parseToTokens(input);
 
@@ -12,12 +16,12 @@ long double FunctionParser::parse(const std::string &input) {
         if (i != tokens->begin()) {
             std::cout << ',';
         }
-        std::cout << (*i)->getData();
+        std::cout << (*i)->toString();
     }
     std::cout << "]" << std::endl;
 
     ASTBuilder astBuilder;
     auto expression = astBuilder.tokensToExpression(*tokens);
     std::cout << "Expression: " << expression->toString() << std::endl;
-    return expression->resolve();
+    return expression->resolve(vars);
 }

@@ -10,7 +10,7 @@
 #include "ASTBuilder.hpp"
 
 enum TokenType {
-    NUMBER, OPERATOR, PARENTHESIS_OPENED, PARENTHESIS_CLOSE
+    NUMBER, OPERATOR, PARENTHESIS_OPENED, PARENTHESIS_CLOSE, CONSTANT, VARIABLE, POSTFIX_OPERATOR
 };
 
 class ASTNode;
@@ -25,6 +25,8 @@ public:
     const std::string &getData();
 
     std::shared_ptr<ASTNode> toASTNode();
+
+    std::string toString() const;
 };
 
 class InvalidFormulaException : public std::exception {
@@ -91,6 +93,20 @@ class DigitReadingState : public State {
 
 };
 
+class CharacterReadingState : public State {
+    private:
+        std::stringstream numberBuffer;
+    public:
+    CharacterReadingState(char initialDigit);
+
+        void validate(char readCharacter, char nextCharacter);
+
+        std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
+
+        std::shared_ptr<Token> getToken();
+
+};
+
 class ParenthesisOpenState : public EmptyOperatorParenthesisOpenState {
 private:
     char character;
@@ -121,11 +137,42 @@ class DigitCompleteState : public DigitOrCharacterReadingCompletedState {
 
 };
 
+class ConstantCompletedState : public DigitOrCharacterReadingCompletedState {
+private:
+    std::string constant;
+public:
+    ConstantCompletedState(const std::string& constant);
+
+    std::shared_ptr<Token> getToken();
+
+};
+
+class VarCompletedState : public DigitOrCharacterReadingCompletedState {
+private:
+    std::string varName;
+public:
+    VarCompletedState(const std::string& varName);
+
+    std::shared_ptr<Token> getToken();
+
+};
+
+
 class OperatorState : public EmptyOperatorParenthesisOpenState {
     private:
         char symbol;
     public:
         OperatorState(char symbol);
+
+        std::shared_ptr<Token> getToken();
+
+};
+
+class PostfixOperationState : public EmptyOperatorParenthesisOpenState {
+    private:
+        std::string operatorName;
+    public:
+    PostfixOperationState(const std::string& operatorName);
 
         std::shared_ptr<Token> getToken();
 

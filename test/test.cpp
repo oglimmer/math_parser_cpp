@@ -152,3 +152,39 @@ TEST_CASE("testing FunctionParser - double parenthesis and addition and multipli
     auto result = functionParser.parse("3*(2*(2+3)+3)");
     CHECK(result == 39);
 }
+
+TEST_CASE("testing FunctionParser - pi and e") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("pi*e");
+    CHECK(result == 8.5397342226735659);
+}
+
+TEST_CASE("testing FunctionParser - postoperator") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("sin(1)*cos(2)*tan(3)*asin(.1)*acos(.2)*atan(.3)*sqrt(7)*log(8)*logten(9)");
+    CHECK(result == 0.010477076341892384);
+}
+
+TEST_CASE("testing FunctionParser - sqrt") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("sqrt(3+3+3)");
+    CHECK(result == 3);
+}
+
+TEST_CASE("testing FunctionParser - trigonometry") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("sin(2)*cos(3)*tan(4)");
+    CHECK(result == -1.0422679740284269);
+}
+
+TEST_CASE("testing FunctionParser - asin") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("2*asin(1)-pi");
+    CHECK(result == 0);
+}
+
+TEST_CASE("testing FunctionParser - log") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("log(3)*logten(4)");
+    CHECK(result == 0.66143050498831513);
+}

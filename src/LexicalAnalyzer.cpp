@@ -19,10 +19,43 @@ std::shared_ptr<ASTNode> Token::toASTNode() {
         case TokenType::PARENTHESIS_OPENED:
         case TokenType::PARENTHESIS_CLOSE:
             return std::make_shared<Parenthesis>(data[0]);
+        case TokenType::CONSTANT:
+            return std::make_shared<Constant>(data);
+        case TokenType::VARIABLE:
+            return std::make_shared<Variable>(data);
+        case TokenType::POSTFIX_OPERATOR:
+            return std::make_shared<PostfixOperation>(data);
     }
     return nullptr;
 }
 
+std::string Token::toString() const {
+    std::string typeStr;
+    switch (tokenType) {
+        case TokenType::NUMBER:
+            typeStr = "NUMBER";
+            break;
+        case TokenType::OPERATOR:
+            typeStr = "OPERATOR";
+            break;
+        case TokenType::PARENTHESIS_OPENED:
+            typeStr = "PARENTHESIS_OPENED";
+            break;
+        case TokenType::PARENTHESIS_CLOSE:
+            typeStr = "PARENTHESIS_CLOSE";
+            break;
+        case TokenType::CONSTANT:
+            typeStr = "CONSTANT";
+            break;
+        case TokenType::VARIABLE:
+            typeStr = "VARIABLE";
+            break;
+        case TokenType::POSTFIX_OPERATOR:
+            typeStr = "POSTFIX_OPERATOR";
+            break;
+    }
+    return "{type:" + typeStr + ", data:" + data + "}";
+}
 
 /* *************************************************************************************************** */
 
@@ -87,17 +120,17 @@ std::shared_ptr<Transition> EmptyOperatorParenthesisOpenState::transition(char r
     } else if (isNumber(nextCharacter)) {
         return std::make_shared<DigitReadingState>(readCharacter)->getTransition();
     } else if (isAlphabetic(nextCharacter)) {
-//        return std::make_shared<CharacterReadingState>(readCharacter)->getTransition();
+        return std::make_shared<CharacterReadingState>(readCharacter)->getTransition();
     } else if (nextCharacter == 0 || isOperator(nextCharacter) || nextCharacter == PARENTHESIS_CLOSED) {
         if (isNumber(readCharacter)) {
             return std::make_shared<DigitCompleteState>(std::string(1, readCharacter))->getTransition();
         } else if (isAlphabetic(readCharacter)) {
             if (containsConstant(std::string(1, readCharacter))) {
-//                return new ConstantCompletedState(Character.toString(readCharacter)).getTransitionResult();
+                return std::make_shared<ConstantCompletedState>(std::string(1, readCharacter))->getTransition();
             } else if (containsKeyword(std::string(1, readCharacter))) {
-//                return new PostfixOperationState(Character.toString(readCharacter)).getTransitionResult();
+                return std::make_shared<PostfixOperationState>(std::string(1, readCharacter))->getTransition();
             } else {
-//                return new VarCompletedState(Character.toString(readCharacter)).getTransitionResult();
+                return std::make_shared<VarCompletedState>(std::string(1, readCharacter))->getTransition();
             }
         }
     }
@@ -119,7 +152,7 @@ void DigitReadingState::validate(char readCharacter, char nextCharacter) {
 std::shared_ptr<Transition> DigitReadingState::transition(char readCharacter, char nextCharacter) {
     numberBuffer << readCharacter;
 
-    if (isOperator(nextCharacter) || nextCharacter == 0) {
+    if (isOperator(nextCharacter) || nextCharacter == 0 || nextCharacter == PARENTHESIS_CLOSED) {
         return std::make_shared<DigitCompleteState>(numberBuffer.str())->getTransition();
     }
 
@@ -127,6 +160,40 @@ std::shared_ptr<Transition> DigitReadingState::transition(char readCharacter, ch
 }
 
 std::shared_ptr<Token> DigitReadingState::getToken() {
+    return nullptr;
+}
+
+/* *************************************************************************************************** */
+
+CharacterReadingState::CharacterReadingState(char initialDigit) {
+    numberBuffer << initialDigit;
+}
+
+void CharacterReadingState::validate(char readCharacter, char nextCharacter) {
+    if (!isAlphabetic(readCharacter)) {
+        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
+    }
+}
+
+std::shared_ptr<Transition> CharacterReadingState::transition(char readCharacter, char nextCharacter) {
+    numberBuffer << readCharacter;
+
+    if (nextCharacter == 0 || isOperator(nextCharacter) ||
+            nextCharacter == PARENTHESIS_CLOSED ||
+            (nextCharacter == PARENTHESIS_OPEN && containsKeyword(numberBuffer.str()))) {
+        if (containsConstant(numberBuffer.str())) {
+            return std::make_shared<ConstantCompletedState>(numberBuffer.str())->getTransition();
+        } else if (containsKeyword(numberBuffer.str())) {
+            return std::make_shared<PostfixOperationState>(numberBuffer.str())->getTransition();
+        } else {
+            return std::make_shared<VarCompletedState>(numberBuffer.str())->getTransition();
+        }
+    }
+
+    return getTransition();
+}
+
+std::shared_ptr<Token> CharacterReadingState::getToken() {
     return nullptr;
 }
 
@@ -153,6 +220,21 @@ DigitCompleteState::DigitCompleteState(const std::string &number) : number(numbe
 std::shared_ptr<Token> DigitCompleteState::getToken() {
     return std::make_unique<Token>(number, TokenType::NUMBER);
 }
+/* *************************************************************************************************** */
+
+ConstantCompletedState::ConstantCompletedState(const std::string &constant) : constant(constant) {}
+
+std::shared_ptr<Token> ConstantCompletedState::getToken() {
+    return std::make_unique<Token>(constant, TokenType::CONSTANT);
+}
+
+/* *************************************************************************************************** */
+
+VarCompletedState::VarCompletedState(const std::string &varName) : varName(varName) {}
+
+std::shared_ptr<Token> VarCompletedState::getToken() {
+    return std::make_unique<Token>(varName, TokenType::VARIABLE);
+}
 
 /* *************************************************************************************************** */
 
@@ -160,6 +242,14 @@ OperatorState::OperatorState(char symbol) : symbol(symbol) {}
 
 std::shared_ptr<Token> OperatorState::getToken() {
     return std::make_unique<Token>(std::string(1, symbol), TokenType::OPERATOR);
+}
+
+/* *************************************************************************************************** */
+
+PostfixOperationState::PostfixOperationState(const std::string& operatorName) : operatorName(operatorName) {}
+
+std::shared_ptr<Token> PostfixOperationState::getToken() {
+    return std::make_unique<Token>(operatorName, TokenType::POSTFIX_OPERATOR);
 }
 
 /* *************************************************************************************************** */

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <map>
 #include "LexicalAnalyzer.hpp"
 
 class Token;
@@ -10,6 +11,7 @@ class Operation;
 class ASTNode {
 public:
     virtual bool openForInput() = 0;
+
     virtual std::string toString() = 0;
 };
 
@@ -17,7 +19,7 @@ class Expression : public ASTNode {
 public:
     virtual std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd) = 0;
 
-    virtual long double resolve() = 0;
+    virtual long double resolve(std::map<std::string, long double> vars) = 0;
 
     virtual std::shared_ptr<Expression> simplify() = 0;
 
@@ -33,11 +35,13 @@ private:
     std::shared_ptr<Operation> op;
 public:
     BinaryOperationExpression(std::shared_ptr<Expression> op1, std::shared_ptr<Operation> op);
-    BinaryOperationExpression(std::shared_ptr<Expression> op1, std::shared_ptr<Operation> op, std::shared_ptr<Expression> op2);
+
+    BinaryOperationExpression(std::shared_ptr<Expression> op1, std::shared_ptr<Operation> op,
+                              std::shared_ptr<Expression> op2);
 
     std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
 
-    long double resolve();
+    long double resolve(std::map<std::string, long double> vars);
 
     std::shared_ptr<Expression> simplify();
 
@@ -56,7 +60,41 @@ public:
 
     std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
 
-    long double resolve();
+    long double resolve(std::map<std::string, long double> vars);
+
+    std::shared_ptr<Expression> simplify();
+
+    bool openForInput();
+
+    std::string toString();
+};
+
+class Constant : public Expression, public std::enable_shared_from_this<Constant> {
+private:
+    std::string constantName;
+public:
+    Constant(const std::string &constantName);
+
+    std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
+
+    long double resolve(std::map<std::string, long double> vars);
+
+    std::shared_ptr<Expression> simplify();
+
+    bool openForInput();
+
+    std::string toString();
+};
+
+class Variable : public Expression, public std::enable_shared_from_this<Variable> {
+private:
+    std::string variableName;
+public:
+    Variable(const std::string &variableName);
+
+    std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
+
+    long double resolve(std::map<std::string, long double> vars);
 
     std::shared_ptr<Expression> simplify();
 
@@ -78,7 +116,7 @@ public:
 
     std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
 
-    long double resolve();
+    long double resolve(std::map<std::string, long double> vars);
 
     std::shared_ptr<Expression> simplify();
 
@@ -98,9 +136,29 @@ public:
 
     int getPrecedence() const;
 
-    long double resolve(std::shared_ptr<Expression> op1, std::shared_ptr<Expression> op2);
+    long double resolve(std::map<std::string, long double> vars, std::shared_ptr<Expression> op1, std::shared_ptr<Expression> op2);
 
     bool openForInput();
+
+    std::string toString();
+};
+
+class PostfixOperation : public Expression, public std::enable_shared_from_this<PostfixOperation> {
+private:
+    std::shared_ptr<Expression> nestedExp;
+    std::string operatorName;
+public:
+    PostfixOperation(const std::string& operatorName);
+
+    std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
+
+    long double resolve(std::map<std::string, long double> vars);
+
+    std::shared_ptr<Expression> simplify();
+
+    bool openForInput();
+
+    void validate();
 
     std::string toString();
 };
