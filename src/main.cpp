@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
 
-#include "LexicalAnalyzer.hpp"
+#include "tokenize/LexicalAnalyzer.hpp"
 #include "FunctionParser.hpp"
+#include "InvalidFormulaException.hpp"
+#include "ast/Expression.hpp"
 
 int main(int argc, char *argv[]) {
 

@@ -1,6 +1,11 @@
 
 #include "FunctionParser.hpp"
-#include "LexicalAnalyzer.hpp"
+
+#include "tokenize/LexicalAnalyzer.hpp"
+#include "tokenize/Token.hpp"
+#include "ast/Expression.hpp"
+
+#include <iostream>
 
 std::unique_ptr<std::vector<std::shared_ptr<Token>>> FunctionParser::tokenize(const std::string &input) const {
     LexicalAnalyzer lexicalAnalyzer;

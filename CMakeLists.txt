@@ -16,8 +16,35 @@ endif()
 
 add_library(${project_name}-lib
         src/characterType.cpp
-        src/LexicalAnalyzer.cpp
-        src/ASTBuilder.cpp src/ASTBuilder.hpp src/FunctionParser.cpp src/FunctionParser.hpp)
+        src/tokenize/LexicalAnalyzer.cpp
+        src/ast/ASTBuilder.cpp
+        src/FunctionParser.cpp
+        src/ast/ASTNode.cpp
+        src/ast/Expression.cpp
+        src/ast/BinaryOperationExpression.cpp
+        src/ast/Number.cpp
+        src/ast/Constant.cpp
+        src/ast/Operation.cpp
+        src/ast/Parenthesis.cpp
+        src/ast/PostfixOperation.cpp
+        src/ast/Variable.cpp
+        src/tokenize/CharacterReadingState.cpp
+        src/tokenize/ConstantCompletedState.cpp
+        src/tokenize/DigitCompleteState.cpp
+        src/tokenize/DigitOrCharacterReadingCompletedState.cpp
+        src/tokenize/DigitReadingState.cpp
+        src/tokenize/EmptyOperatorParenthesisOpenState.cpp
+        src/tokenize/EmptyState.cpp
+        src/tokenize/FSM.cpp
+        src/InvalidFormulaException.cpp
+        src/tokenize/OperatorState.cpp
+        src/tokenize/ParenthesisClosedState.cpp
+        src/tokenize/ParenthesisOpenState.cpp
+        src/tokenize/PostfixOperationState.cpp
+        src/tokenize/State.cpp
+        src/tokenize/Token.cpp
+        src/tokenize/Transition.cpp
+        src/tokenize/VarCompletedState.cpp)
 
 target_link_libraries(${project_name}-lib
         PUBLIC doctest::doctest

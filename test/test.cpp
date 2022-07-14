@@ -4,7 +4,9 @@
 #include "doctest/doctest.h"
 
 #include "characterType.hpp"
-#include "LexicalAnalyzer.hpp"
+#include "tokenize/LexicalAnalyzer.hpp"
+#include "tokenize/Token.hpp"
+#include "InvalidFormulaException.hpp"
 #include "FunctionParser.hpp"
 
 

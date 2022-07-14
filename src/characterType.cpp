@@ -1,5 +1,7 @@
 #include "characterType.hpp"
-#include "ASTBuilder.hpp"
+#include "ast/Constant.hpp"
+#include "ast/Operation.hpp"
+#include "ast/PostfixOperation.hpp"
 #include <cctype>
 
 bool isAlphabetic(char c) {
@@ -16,10 +18,6 @@ bool isOperator(char c) {
 
 bool isAlgebraicSign(char c) {
     return c == '+' || c == '-';
-}
-
-bool isBracket(char c) {
-    return c == PARENTHESIS_CHAR_OPEN || c == PARENTHESIS_CHAR_CLOSE;
 }
 
 bool containsKeyword(const std::string& str) {
