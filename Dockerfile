@@ -16,5 +16,7 @@ RUN cd /home/math_parser &&  \
 FROM debian:11-slim
 
 COPY --from=0 /home/math_parser/build/math_parser-bin /usr/bin
+COPY entrypoint.sh /
 
-CMD math_parser-bin
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD [ "math_parser-bin" ]

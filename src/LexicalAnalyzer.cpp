@@ -6,14 +6,14 @@
 
 Token::Token(const std::string &data, TokenType tokenType) : data(data), tokenType(tokenType) {}
 
-const std::string &Token::getData() {
+const std::string &Token::getData() const {
     return data;
 }
 
-std::shared_ptr<ASTNode> Token::toASTNode() {
+std::shared_ptr<ASTNode> Token::toASTNode() const {
     switch (tokenType) {
         case TokenType::NUMBER:
-            return std::shared_ptr<Number>(new Number(std::stold(data)));
+            return std::make_shared<Number>(std::stold(data));
         case TokenType::OPERATOR:
             return std::make_shared<Operation>(data[0]);
         case TokenType::PARENTHESIS_OPENED:
@@ -54,7 +54,7 @@ std::string Token::toString() const {
             typeStr = "POSTFIX_OPERATOR";
             break;
     }
-    return "{type:" + typeStr + ", data:" + data + "}";
+    return "{type:" + typeStr + ", data:'" + data + "'}";
 }
 
 /* *************************************************************************************************** */
@@ -62,16 +62,25 @@ std::string Token::toString() const {
 InvalidFormulaException::InvalidFormulaException(const std::string &message) : message_(message) {
 }
 
+const char *InvalidFormulaException::what() const noexcept {
+    return message_.c_str();
+}
+
+std::ostream &InvalidFormulaException::operator<<(std::ostream &os) const {
+    os << message_;
+    return os;
+}
+
 /* *************************************************************************************************** */
 
-Transition::Transition(std::shared_ptr<State> targetState, std::shared_ptr<Token> token) : token(token),
-                                                                                           targetState(targetState) {}
+Transition::Transition(std::shared_ptr<State> targetState, std::shared_ptr<Token> token)
+        : token(token), targetState(targetState) {}
 
-std::shared_ptr<State> Transition::getTargetState() {
+std::shared_ptr<State> Transition::getTargetState() const {
     return targetState;
 }
 
-std::shared_ptr<Token> Transition::getToken() {
+std::shared_ptr<Token> Transition::getToken() const {
     return token;
 }
 
@@ -84,8 +93,8 @@ std::shared_ptr<Transition> State::getTransition() {
 /* *************************************************************************************************** */
 
 
-void DigitOrCharacterReadingCompletedState::validate(char readCharacter, char nextCharacter) {
-    if (!isOperator(readCharacter) && readCharacter != PARENTHESIS_CLOSED) {
+void DigitOrCharacterReadingCompletedState::validate(char readCharacter, char nextCharacter) const {
+    if (!isOperator(readCharacter) && readCharacter != PARENTHESIS_CHAR_CLOSE) {
         throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
     }
 }
@@ -93,7 +102,7 @@ void DigitOrCharacterReadingCompletedState::validate(char readCharacter, char ne
 std::shared_ptr<Transition> DigitOrCharacterReadingCompletedState::transition(char readCharacter, char nextCharacter) {
     if (isOperator(readCharacter)) {
         return std::make_shared<OperatorState>(readCharacter)->getTransition();
-    } else if (readCharacter == PARENTHESIS_CLOSED) {
+    } else if (readCharacter == PARENTHESIS_CHAR_CLOSE) {
         return std::make_shared<ParenthesisClosedState>(readCharacter)->getTransition();
     }
     return nullptr;
@@ -102,27 +111,28 @@ std::shared_ptr<Transition> DigitOrCharacterReadingCompletedState::transition(ch
 /* *************************************************************************************************** */
 
 
-void EmptyOperatorParenthesisOpenState::validate(char readCharacter, char nextCharacter) {
+void EmptyOperatorParenthesisOpenState::validate(char readCharacter, char nextCharacter) const {
     if (isOperator(readCharacter) && !isAlgebraicSign(readCharacter)) {
         throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
     }
-    if (readCharacter == PARENTHESIS_CLOSED) {
+    if (readCharacter == PARENTHESIS_CHAR_CLOSE) {
         throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
     }
-    if (!isNumber(readCharacter) && !isAlgebraicSign(readCharacter) && readCharacter != PARENTHESIS_OPEN && !isAlphabetic(readCharacter)) {
+    if (!isDigit(readCharacter) && !isAlgebraicSign(readCharacter) && readCharacter != PARENTHESIS_CHAR_OPEN &&
+        !isAlphabetic(readCharacter)) {
         throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
     }
 }
 
 std::shared_ptr<Transition> EmptyOperatorParenthesisOpenState::transition(char readCharacter, char nextCharacter) {
-    if (readCharacter == PARENTHESIS_OPEN) {
+    if (readCharacter == PARENTHESIS_CHAR_OPEN) {
         return std::make_shared<ParenthesisOpenState>(readCharacter)->getTransition();
-    } else if (isNumber(nextCharacter)) {
+    } else if (isDigit(nextCharacter)) {
         return std::make_shared<DigitReadingState>(readCharacter)->getTransition();
     } else if (isAlphabetic(nextCharacter)) {
         return std::make_shared<CharacterReadingState>(readCharacter)->getTransition();
-    } else if (nextCharacter == 0 || isOperator(nextCharacter) || nextCharacter == PARENTHESIS_CLOSED) {
-        if (isNumber(readCharacter)) {
+    } else if (nextCharacter == 0 || isOperator(nextCharacter) || nextCharacter == PARENTHESIS_CHAR_CLOSE) {
+        if (isDigit(readCharacter)) {
             return std::make_shared<DigitCompleteState>(std::string(1, readCharacter))->getTransition();
         } else if (isAlphabetic(readCharacter)) {
             if (containsConstant(std::string(1, readCharacter))) {
@@ -143,7 +153,7 @@ DigitReadingState::DigitReadingState(char initialDigit) {
     numberBuffer << initialDigit;
 }
 
-void DigitReadingState::validate(char readCharacter, char nextCharacter) {
+void DigitReadingState::validate(char readCharacter, char nextCharacter) const {
     if (isOperator(readCharacter)) {
         throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
     }
@@ -152,14 +162,14 @@ void DigitReadingState::validate(char readCharacter, char nextCharacter) {
 std::shared_ptr<Transition> DigitReadingState::transition(char readCharacter, char nextCharacter) {
     numberBuffer << readCharacter;
 
-    if (isOperator(nextCharacter) || nextCharacter == 0 || nextCharacter == PARENTHESIS_CLOSED) {
+    if (isOperator(nextCharacter) || nextCharacter == 0 || nextCharacter == PARENTHESIS_CHAR_CLOSE) {
         return std::make_shared<DigitCompleteState>(numberBuffer.str())->getTransition();
     }
 
     return getTransition();
 }
 
-std::shared_ptr<Token> DigitReadingState::getToken() {
+std::shared_ptr<Token> DigitReadingState::getToken() const {
     return nullptr;
 }
 
@@ -169,7 +179,7 @@ CharacterReadingState::CharacterReadingState(char initialDigit) {
     numberBuffer << initialDigit;
 }
 
-void CharacterReadingState::validate(char readCharacter, char nextCharacter) {
+void CharacterReadingState::validate(char readCharacter, char nextCharacter) const {
     if (!isAlphabetic(readCharacter)) {
         throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
     }
@@ -179,8 +189,8 @@ std::shared_ptr<Transition> CharacterReadingState::transition(char readCharacter
     numberBuffer << readCharacter;
 
     if (nextCharacter == 0 || isOperator(nextCharacter) ||
-            nextCharacter == PARENTHESIS_CLOSED ||
-            (nextCharacter == PARENTHESIS_OPEN && containsKeyword(numberBuffer.str()))) {
+        nextCharacter == PARENTHESIS_CHAR_CLOSE ||
+        (nextCharacter == PARENTHESIS_CHAR_OPEN && containsKeyword(numberBuffer.str()))) {
         if (containsConstant(numberBuffer.str())) {
             return std::make_shared<ConstantCompletedState>(numberBuffer.str())->getTransition();
         } else if (containsKeyword(numberBuffer.str())) {
@@ -193,7 +203,7 @@ std::shared_ptr<Transition> CharacterReadingState::transition(char readCharacter
     return getTransition();
 }
 
-std::shared_ptr<Token> CharacterReadingState::getToken() {
+std::shared_ptr<Token> CharacterReadingState::getToken() const {
     return nullptr;
 }
 
@@ -201,7 +211,7 @@ std::shared_ptr<Token> CharacterReadingState::getToken() {
 
 ParenthesisOpenState::ParenthesisOpenState(char character) : character(character) {}
 
-std::shared_ptr<Token> ParenthesisOpenState::getToken() {
+std::shared_ptr<Token> ParenthesisOpenState::getToken() const {
     return std::make_unique<Token>(std::string(1, character), TokenType::PARENTHESIS_OPENED);
 }
 
@@ -209,7 +219,7 @@ std::shared_ptr<Token> ParenthesisOpenState::getToken() {
 
 ParenthesisClosedState::ParenthesisClosedState(char character) : character(character) {}
 
-std::shared_ptr<Token> ParenthesisClosedState::getToken() {
+std::shared_ptr<Token> ParenthesisClosedState::getToken() const {
     return std::make_unique<Token>(std::string(1, character), TokenType::PARENTHESIS_CLOSE);
 }
 
@@ -217,14 +227,15 @@ std::shared_ptr<Token> ParenthesisClosedState::getToken() {
 
 DigitCompleteState::DigitCompleteState(const std::string &number) : number(number) {}
 
-std::shared_ptr<Token> DigitCompleteState::getToken() {
+std::shared_ptr<Token> DigitCompleteState::getToken() const {
     return std::make_unique<Token>(number, TokenType::NUMBER);
 }
+
 /* *************************************************************************************************** */
 
 ConstantCompletedState::ConstantCompletedState(const std::string &constant) : constant(constant) {}
 
-std::shared_ptr<Token> ConstantCompletedState::getToken() {
+std::shared_ptr<Token> ConstantCompletedState::getToken() const {
     return std::make_unique<Token>(constant, TokenType::CONSTANT);
 }
 
@@ -232,7 +243,7 @@ std::shared_ptr<Token> ConstantCompletedState::getToken() {
 
 VarCompletedState::VarCompletedState(const std::string &varName) : varName(varName) {}
 
-std::shared_ptr<Token> VarCompletedState::getToken() {
+std::shared_ptr<Token> VarCompletedState::getToken() const {
     return std::make_unique<Token>(varName, TokenType::VARIABLE);
 }
 
@@ -240,21 +251,21 @@ std::shared_ptr<Token> VarCompletedState::getToken() {
 
 OperatorState::OperatorState(char symbol) : symbol(symbol) {}
 
-std::shared_ptr<Token> OperatorState::getToken() {
+std::shared_ptr<Token> OperatorState::getToken() const {
     return std::make_unique<Token>(std::string(1, symbol), TokenType::OPERATOR);
 }
 
 /* *************************************************************************************************** */
 
-PostfixOperationState::PostfixOperationState(const std::string& operatorName) : operatorName(operatorName) {}
+PostfixOperationState::PostfixOperationState(const std::string &operatorName) : operatorName(operatorName) {}
 
-std::shared_ptr<Token> PostfixOperationState::getToken() {
+std::shared_ptr<Token> PostfixOperationState::getToken() const {
     return std::make_unique<Token>(operatorName, TokenType::POSTFIX_OPERATOR);
 }
 
 /* *************************************************************************************************** */
 
-std::shared_ptr<Token> EmptyState::getToken() {
+std::shared_ptr<Token> EmptyState::getToken() const {
     return nullptr;
 }
 
@@ -263,8 +274,6 @@ std::shared_ptr<Token> EmptyState::getToken() {
 FSM::FSM() : state(std::make_shared<EmptyState>()) {
 
 }
-
-/* *************************************************************************************************** */
 
 std::shared_ptr<Token> FSM::transition(char readCharacter, char nextCharacter) {
     state->validate(readCharacter, nextCharacter);
@@ -275,15 +284,15 @@ std::shared_ptr<Token> FSM::transition(char readCharacter, char nextCharacter) {
 
 /* *************************************************************************************************** */
 
-std::unique_ptr<std::vector<std::shared_ptr<Token>>> LexicalAnalyzer::parseToTokens(const std::string &input) {
+std::unique_ptr<std::vector<std::shared_ptr<Token>>> LexicalAnalyzer::parseToTokens(const std::string &input) const {
     auto resultVector = std::make_unique<std::vector<std::shared_ptr<Token>>>();
     FSM fsm;
-    for (auto i = 0; i < input.length(); i++) {
+    for (auto pos = 0; pos < input.length(); pos++) {
 
-        char readCharacter = input[i];
-        char nextCharacter = input[i + 1];
+        char readCharacter = input[pos];
+        char nextCharacter = input[pos + 1];
 
-        auto token = fsm.transition(readCharacter, nextCharacter);
+        std::shared_ptr<Token> token = fsm.transition(readCharacter, nextCharacter);
         if (token) {
             resultVector->push_back(token);
         }

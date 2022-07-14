@@ -2,26 +2,37 @@
 #include "FunctionParser.hpp"
 #include "LexicalAnalyzer.hpp"
 
-long double FunctionParser::parse(const std::string &input) {
-    std::map<std::string, long double> vars;
-    return parse(input, vars);
+std::unique_ptr<std::vector<std::shared_ptr<Token>>> FunctionParser::tokenize(const std::string &input) const {
+    LexicalAnalyzer lexicalAnalyzer;
+    return lexicalAnalyzer.parseToTokens(input);
 }
 
-long double FunctionParser::parse(const std::string &input, std::map<std::string, long double> vars) {
-    LexicalAnalyzer lexicalAnalyzer;
-    std::unique_ptr<std::vector<std::shared_ptr<Token>>> tokens = lexicalAnalyzer.parseToTokens(input);
+std::shared_ptr<Expression> FunctionParser::tokensToExpression(const std::unique_ptr<std::vector<std::shared_ptr<Token>>>& tokens) const {
+    ASTBuilder astBuilder;
+    return astBuilder.tokensToExpression(*tokens);
+}
 
+std::shared_ptr<Expression> FunctionParser::debugParse(const std::string &input) const {
+    std::unique_ptr<std::vector<std::shared_ptr<Token>>> tokens = tokenize(input);
+    debugOutput(tokens);
+
+    std::shared_ptr<Expression> expression = tokensToExpression(tokens);
+    std::cout << "Expression: " << expression->toString() << std::endl;
+
+    return expression;
+}
+
+long double FunctionParser::debugResolve(const std::string &input, std::map<std::string, long double> vars) const {
+    return debugParse(input)->resolve(vars);
+}
+
+void FunctionParser::debugOutput(const std::unique_ptr<std::vector<std::shared_ptr<Token>>> &tokens) const {
     std::cout << "Tokens: [";
-    for (auto i = tokens->begin(); i != tokens->end(); ++i) {
-        if (i != tokens->begin()) {
+    for (auto it = tokens->begin(); it != tokens->end(); ++it) {
+        if (it != tokens->begin()) {
             std::cout << ',';
         }
-        std::cout << (*i)->toString();
+        std::cout << (*it)->toString();
     }
     std::cout << "]" << std::endl;
-
-    ASTBuilder astBuilder;
-    auto expression = astBuilder.tokensToExpression(*tokens);
-    std::cout << "Expression: " << expression->toString() << std::endl;
-    return expression->resolve(vars);
 }

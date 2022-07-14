@@ -2,13 +2,13 @@
 
 ## Supported syntax
 
-It can parse `+ - * / ^ ( )` as in `53 * 34` or `(2+3)*4^2`
+It can debugResolve `+ - * / ^ ( )` as in `53 * 34` or `(2+3)*4^2`
 
-It can parse `sqrt log logten sin cos tan asin acos atan` as in `sqrt(9) or cos(343)` (`log` is log to base of 2, and `logten` is log to the base of 10)
+It can debugResolve `sqrt log logten sin cos tan asin acos atan` as in `sqrt(9) or cos(343)` (`log` is log to base of 2, and `logten` is log to the base of 10)
 
-It can parse `pi e` to return the constants pi and e.
+It can debugResolve `pi e` to return the constants pi and e.
 
-Finally it can parse any variable name matching `^\w+$`.
+Finally it can debugResolve any variable name matching `^\w+$`.
 
 ## How to use it
 

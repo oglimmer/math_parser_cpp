@@ -12,7 +12,6 @@ int main(int argc, char *argv[]) {
     }
 
     std::string input(argv[1]);
-    std::cout << "Input: " << input << std::endl;
 
     std::map<std::string, long double> vars;
     for (int i = 2; i + 1 < argc; i += 2) {
@@ -22,8 +21,10 @@ int main(int argc, char *argv[]) {
     }
 
     FunctionParser functionParser;
-    auto result = functionParser.parse(input, vars);
-    std::cout << "Result: " << result << std::endl;
+    auto tokens = functionParser.tokenize(input);
+    auto expression = functionParser.tokensToExpression(tokens);
+    std::cout.precision(34);
+    std::cout << expression->resolve(vars) << std::endl;
 
     return EXIT_SUCCESS;
 }

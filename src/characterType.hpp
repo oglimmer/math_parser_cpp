@@ -5,7 +5,7 @@
 
 bool isAlphabetic(char c);
 
-bool isNumber(char c);
+bool isDigit(char c);
 
 bool isOperator(char c);
 

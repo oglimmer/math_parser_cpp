@@ -1,16 +1,17 @@
 #include "characterType.hpp"
+#include "ASTBuilder.hpp"
 #include <cctype>
 
 bool isAlphabetic(char c) {
     return std::isalpha(c);
 }
 
-bool isNumber(char c) {
+bool isDigit(char c) {
     return std::isdigit(c) || c == '.';
 }
 
 bool isOperator(char c) {
-    return c == '+' || c == '-' || c == '/' || c == '*' || c == '^';
+    return Operation::match(c);
 }
 
 bool isAlgebraicSign(char c) {
@@ -18,13 +19,13 @@ bool isAlgebraicSign(char c) {
 }
 
 bool isBracket(char c) {
-    return c == '(' || c == ')';
+    return c == PARENTHESIS_CHAR_OPEN || c == PARENTHESIS_CHAR_CLOSE;
 }
 
 bool containsKeyword(const std::string& str) {
-    return str == "pi" || str == "e" || str == "sin" || str == "cos" || str == "tan" || str == "asin" || str == "acos" || str == "atan" || str == "sqrt" || str == "log" || str == "logten";
+    return ConstantEnum::match(str) || PostfixOperationEnum::match(str);
 }
 
 bool containsConstant(const std::string& str) {
-    return str == "pi" || str == "e";
+    return ConstantEnum::match(str);
 }
