@@ -8,8 +8,8 @@
 
 class EmptyOperatorParenthesisOpenState : public State {
 public:
-    void validate(char readCharacter, char nextCharacter) const;
+    void validate(char readCharacter, char nextCharacter) const override;
 
-    std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
+    std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter) override;
 };
 

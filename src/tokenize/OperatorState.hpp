@@ -12,6 +12,6 @@ private:
 public:
     OperatorState(char symbol);
 
-    std::shared_ptr<Token> getToken() const;
+    std::shared_ptr<Token> getToken() const override;
 
 };

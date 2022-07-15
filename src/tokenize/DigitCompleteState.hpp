@@ -12,7 +12,7 @@ private:
 public:
     DigitCompleteState(const std::string &number);
 
-    std::shared_ptr<Token> getToken() const;
+    std::shared_ptr<Token> getToken() const override;
 
 };
 

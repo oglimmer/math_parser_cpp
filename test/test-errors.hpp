@@ -24,3 +24,10 @@ TEST_CASE("testing FunctionParser - division by zero") {
     FunctionParser functionParser;
     CHECK(std::isinf(functionParser.debugResolve("1/0")));
 }
+
+TEST_CASE("testing FunctionParser - duplicate .") {
+    FunctionParser functionParser;
+    CHECK_THROWS_WITH_AS(functionParser.debugResolve("1..1"), "Invalid character, duplicate decimal separator.", InvalidFormulaException);
+    CHECK_THROWS_WITH_AS(functionParser.debugResolve("..1"), "Invalid character, duplicate decimal separator.", InvalidFormulaException);
+    CHECK_THROWS_WITH_AS(functionParser.debugResolve(".1."), "Invalid character, duplicate decimal separator.", InvalidFormulaException);
+}

@@ -80,3 +80,12 @@ set_target_properties(${project_name}-lib ${project_name}-bin ${project_name}-te
 
 enable_testing()
 add_test(project-tests ${project_name}-test)
+
+install(TARGETS ${project_name}-bin DESTINATION bin)
+install(TARGETS ${project_name}-lib DESTINATION lib)
+file(GLOB ROOT_HEADER_FILES "src/FunctionParser.hpp" "src/InvalidFormulaException.hpp")
+file(GLOB TOKENIZE_HEADER_FILES "src/tokenize/Token.cpp")
+file(GLOB AST_HEADER_FILES "src/ast/*.hpp")
+install(FILES ${ROOT_HEADER_FILES} DESTINATION include/mathparser)
+install(FILES ${TOKENIZE_HEADER_FILES} DESTINATION include/mathparser/tokenize)
+install(FILES ${AST_HEADER_FILES} DESTINATION include/mathparser/ast)

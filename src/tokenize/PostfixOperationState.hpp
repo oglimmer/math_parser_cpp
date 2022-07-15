@@ -12,6 +12,6 @@ private:
 public:
     PostfixOperationState(const std::string &operatorName);
 
-    std::shared_ptr<Token> getToken() const;
+    std::shared_ptr<Token> getToken() const override;
 
 };

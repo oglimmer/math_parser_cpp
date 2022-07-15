@@ -32,13 +32,13 @@ private:
 public:
     Constant(const std::string &constantName);
 
-    std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd);
+    std::shared_ptr<Expression> add(std::shared_ptr<ASTNode> toAdd) override;
 
-    long double resolve(std::map<std::string, long double> vars) const;
+    long double resolve(std::map<std::string, long double> vars) const override;
 
-    std::shared_ptr<Expression> simplify();
+    std::shared_ptr<Expression> simplify() override;
 
-    bool openForInput() const;
+    bool openForInput() const override;
 
-    std::string toString() const;
+    std::string toString() const override;
 };

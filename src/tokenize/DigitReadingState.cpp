@@ -13,6 +13,9 @@ void DigitReadingState::validate(char readCharacter, char nextCharacter) const {
     if (isOperator(readCharacter)) {
         throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
     }
+    if (readCharacter == '.' && numberBuffer.str().find('.') != std::string::npos) {
+        throw InvalidFormulaException("Invalid character, duplicate decimal separator.");
+    }
 }
 
 std::shared_ptr<Transition> DigitReadingState::transition(char readCharacter, char nextCharacter) {

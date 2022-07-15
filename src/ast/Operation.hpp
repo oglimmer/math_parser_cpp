@@ -17,9 +17,9 @@ public:
     long double resolve(std::map<std::string, long double> vars, std::shared_ptr<Expression> op1,
                         std::shared_ptr<Expression> op2) const;
 
-    bool openForInput() const;
+    bool openForInput() const override;
 
-    std::string toString() const;
+    std::string toString() const override;
 
     static bool match(char symbol);
 };

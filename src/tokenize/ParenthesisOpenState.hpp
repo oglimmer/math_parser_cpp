@@ -12,7 +12,7 @@ private:
 public:
     ParenthesisOpenState(char character);
 
-    std::shared_ptr<Token> getToken() const;
+    std::shared_ptr<Token> getToken() const override;
 
 };
 

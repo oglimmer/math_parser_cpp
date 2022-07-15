@@ -10,7 +10,7 @@ private:
 public:
     VarCompletedState(const std::string &varName);
 
-    std::shared_ptr<Token> getToken() const;
+    std::shared_ptr<Token> getToken() const override;
 
 };
 
