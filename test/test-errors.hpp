@@ -31,3 +31,9 @@ TEST_CASE("testing FunctionParser - duplicate .") {
     CHECK_THROWS_WITH_AS(functionParser.debugResolve("..1"), "Invalid character, duplicate decimal separator.", InvalidFormulaException);
     CHECK_THROWS_WITH_AS(functionParser.debugResolve(".1."), "Invalid character, duplicate decimal separator.", InvalidFormulaException);
 }
+
+TEST_CASE("testing FunctionParser - checking whitespaces") {
+    FunctionParser functionParser;
+    auto result = functionParser.debugResolve("  1   +     2   ");
+    CHECK(result == 3);
+}

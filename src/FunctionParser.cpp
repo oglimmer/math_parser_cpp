@@ -9,10 +9,11 @@
 
 std::unique_ptr<std::vector<std::shared_ptr<Token>>> FunctionParser::tokenize(const std::string &input) const {
     LexicalAnalyzer lexicalAnalyzer;
-    return lexicalAnalyzer.parseToTokens(input);
+    return lexicalAnalyzer.parseToTokens(cleanFromSpaces(input));
 }
 
-std::shared_ptr<Expression> FunctionParser::tokensToExpression(const std::unique_ptr<std::vector<std::shared_ptr<Token>>>& tokens) const {
+std::shared_ptr<Expression>
+FunctionParser::tokensToExpression(const std::unique_ptr<std::vector<std::shared_ptr<Token>>> &tokens) const {
     ASTBuilder astBuilder;
     return astBuilder.tokensToExpression(*tokens);
 }
@@ -40,4 +41,12 @@ void FunctionParser::debugOutput(const std::unique_ptr<std::vector<std::shared_p
         std::cout << (*it)->toString();
     }
     std::cout << "]" << std::endl;
+}
+
+std::string FunctionParser::cleanFromSpaces(const std::string &input) const {
+    std::string cleanString(input);
+    cleanString.erase(
+            std::remove_if(cleanString.begin(), cleanString.end(), [](unsigned char x) { return std::isspace(x); }),
+            cleanString.end());
+    return cleanString;
 }

@@ -22,5 +22,7 @@ private:
     std::shared_ptr<Expression> debugParse(const std::string &input) const;
 
     void debugOutput(const std::unique_ptr<std::vector<std::shared_ptr<Token>>> &tokens) const;
+
+    std::string cleanFromSpaces(const std::string& input) const;
 };
 
