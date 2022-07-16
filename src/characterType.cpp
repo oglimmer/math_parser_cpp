@@ -21,3 +21,10 @@ bool isBracket(char c) {
     return c == '(' || c == ')';
 }
 
+bool containsKeyword(const std::string& str) {
+    return str == "pi" || str == "e";
+}
+
+bool containsConstant(const std::string& str) {
+    return str == "pi" || str == "e";
+}

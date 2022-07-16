@@ -122,3 +122,27 @@ TEST_CASE("testing FunctionParser - power") {
     auto result = functionParser.parse("2*3^4");
     CHECK(result == 162);
 }
+
+TEST_CASE("testing FunctionParser - parenthesis") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("(2)");
+    CHECK(result == 2);
+}
+
+TEST_CASE("testing FunctionParser - parenthesis and addition") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("(2+3)");
+    CHECK(result == 5);
+}
+
+TEST_CASE("testing FunctionParser - parenthesis and addition and multiplication") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("(2+3)*3");
+    CHECK(result == 15);
+}
+
+TEST_CASE("testing FunctionParser - parenthesis and addition and multiplication2") {
+    FunctionParser functionParser;
+    auto result = functionParser.parse("3*(2+3)");
+    CHECK(result == 15);
+}

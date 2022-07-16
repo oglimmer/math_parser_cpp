@@ -10,7 +10,7 @@
 #include "ASTBuilder.hpp"
 
 enum TokenType {
-    NUMBER, OPERATOR
+    NUMBER, OPERATOR, PARENTHESIS_OPENED, PARENTHESIS_CLOSE
 };
 
 class ASTNode;
@@ -23,8 +23,6 @@ public:
     Token(const std::string &data, TokenType tokenType);
 
     const std::string &getData();
-
-    TokenType getTokenType();
 
     std::shared_ptr<ASTNode> toASTNode();
 };
@@ -65,6 +63,19 @@ class State : public std::enable_shared_from_this<State> {
         std::shared_ptr<Transition> getTransition();
 };
 
+class DigitOrCharacterReadingCompletedState : public State {
+public:
+    void validate(char readCharacter, char nextCharacter);
+
+    std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
+};
+
+class EmptyOperatorParenthesisOpenState : public State {
+public:
+    void validate(char readCharacter, char nextCharacter);
+
+    std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
+};
 
 class DigitReadingState : public State {
     private:
@@ -80,39 +91,48 @@ class DigitReadingState : public State {
 
 };
 
-class DigitCompleteState : public State {
+class ParenthesisOpenState : public EmptyOperatorParenthesisOpenState {
+private:
+    char character;
+public:
+    ParenthesisOpenState(char character);
+
+    std::shared_ptr<Token> getToken();
+
+};
+
+class ParenthesisClosedState : public DigitOrCharacterReadingCompletedState {
+private:
+    char character;
+public:
+    ParenthesisClosedState(char character);
+
+    std::shared_ptr<Token> getToken();
+
+};
+
+class DigitCompleteState : public DigitOrCharacterReadingCompletedState {
     private:
         std::string number;
     public:
         DigitCompleteState(const std::string& number);
-        void validate(char readCharacter, char nextCharacter);
-
-        std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
 
         std::shared_ptr<Token> getToken();
 
 };
 
-class OperatorState : public State {
+class OperatorState : public EmptyOperatorParenthesisOpenState {
     private:
         char symbol;
     public:
         OperatorState(char symbol);
 
-        void validate(char readCharacter, char nextCharacter);
-
-        std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
-
         std::shared_ptr<Token> getToken();
 
 };
 
-class EmptyState : public State {
+class EmptyState : public EmptyOperatorParenthesisOpenState {
     public:
-        void validate(char readCharacter, char nextCharacter);
-
-        std::shared_ptr<Transition> transition(char readCharacter, char nextCharacter);
-
         std::shared_ptr<Token> getToken();
 };
 

@@ -10,16 +10,15 @@ const std::string &Token::getData() {
     return data;
 }
 
-TokenType Token::getTokenType() {
-    return tokenType;
-}
-
 std::shared_ptr<ASTNode> Token::toASTNode() {
     switch (tokenType) {
         case TokenType::NUMBER:
             return std::shared_ptr<Number>(new Number(std::stold(data)));
         case TokenType::OPERATOR:
-            return  std::make_shared<Operation>(data[0]);
+            return std::make_shared<Operation>(data[0]);
+        case TokenType::PARENTHESIS_OPENED:
+        case TokenType::PARENTHESIS_CLOSE:
+            return std::make_shared<Parenthesis>(data[0]);
     }
     return nullptr;
 }
@@ -51,6 +50,62 @@ std::shared_ptr<Transition> State::getTransition() {
 
 /* *************************************************************************************************** */
 
+
+void DigitOrCharacterReadingCompletedState::validate(char readCharacter, char nextCharacter) {
+    if (!isOperator(readCharacter) && readCharacter != PARENTHESIS_CLOSED) {
+        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
+    }
+}
+
+std::shared_ptr<Transition> DigitOrCharacterReadingCompletedState::transition(char readCharacter, char nextCharacter) {
+    if (isOperator(readCharacter)) {
+        return std::make_shared<OperatorState>(readCharacter)->getTransition();
+    } else if (readCharacter == PARENTHESIS_CLOSED) {
+        return std::make_shared<ParenthesisClosedState>(readCharacter)->getTransition();
+    }
+    return nullptr;
+}
+
+/* *************************************************************************************************** */
+
+
+void EmptyOperatorParenthesisOpenState::validate(char readCharacter, char nextCharacter) {
+    if (isOperator(readCharacter) && !isAlgebraicSign(readCharacter)) {
+        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
+    }
+    if (readCharacter == PARENTHESIS_CLOSED) {
+        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
+    }
+    if (!isNumber(readCharacter) && !isAlgebraicSign(readCharacter) && readCharacter != PARENTHESIS_OPEN && !isAlphabetic(readCharacter)) {
+        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
+    }
+}
+
+std::shared_ptr<Transition> EmptyOperatorParenthesisOpenState::transition(char readCharacter, char nextCharacter) {
+    if (readCharacter == PARENTHESIS_OPEN) {
+        return std::make_shared<ParenthesisOpenState>(readCharacter)->getTransition();
+    } else if (isNumber(nextCharacter)) {
+        return std::make_shared<DigitReadingState>(readCharacter)->getTransition();
+    } else if (isAlphabetic(nextCharacter)) {
+//        return std::make_shared<CharacterReadingState>(readCharacter)->getTransition();
+    } else if (nextCharacter == 0 || isOperator(nextCharacter) || nextCharacter == PARENTHESIS_CLOSED) {
+        if (isNumber(readCharacter)) {
+            return std::make_shared<DigitCompleteState>(std::string(1, readCharacter))->getTransition();
+        } else if (isAlphabetic(readCharacter)) {
+            if (containsConstant(std::string(1, readCharacter))) {
+//                return new ConstantCompletedState(Character.toString(readCharacter)).getTransitionResult();
+            } else if (containsKeyword(std::string(1, readCharacter))) {
+//                return new PostfixOperationState(Character.toString(readCharacter)).getTransitionResult();
+            } else {
+//                return new VarCompletedState(Character.toString(readCharacter)).getTransitionResult();
+            }
+        }
+    }
+    return getTransition();
+}
+
+/* *************************************************************************************************** */
+
 DigitReadingState::DigitReadingState(char initialDigit) {
     numberBuffer << initialDigit;
 }
@@ -77,17 +132,23 @@ std::shared_ptr<Token> DigitReadingState::getToken() {
 
 /* *************************************************************************************************** */
 
+ParenthesisOpenState::ParenthesisOpenState(char character) : character(character) {}
+
+std::shared_ptr<Token> ParenthesisOpenState::getToken() {
+    return std::make_unique<Token>(std::string(1, character), TokenType::PARENTHESIS_OPENED);
+}
+
+/* *************************************************************************************************** */
+
+ParenthesisClosedState::ParenthesisClosedState(char character) : character(character) {}
+
+std::shared_ptr<Token> ParenthesisClosedState::getToken() {
+    return std::make_unique<Token>(std::string(1, character), TokenType::PARENTHESIS_CLOSE);
+}
+
+/* *************************************************************************************************** */
+
 DigitCompleteState::DigitCompleteState(const std::string &number) : number(number) {}
-
-void DigitCompleteState::validate(char readCharacter, char nextCharacter) {
-    if (!isOperator(readCharacter)) {
-        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
-    }
-}
-
-std::shared_ptr<Transition> DigitCompleteState::transition(char readCharacter, char nextCharacter) {
-    return std::make_shared<OperatorState>(readCharacter)->getTransition();
-}
 
 std::shared_ptr<Token> DigitCompleteState::getToken() {
     return std::make_unique<Token>(number, TokenType::NUMBER);
@@ -97,40 +158,11 @@ std::shared_ptr<Token> DigitCompleteState::getToken() {
 
 OperatorState::OperatorState(char symbol) : symbol(symbol) {}
 
-void OperatorState::validate(char readCharacter, char nextCharacter) {
-    if (isOperator(readCharacter)) {
-        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
-    }
-}
-
-std::shared_ptr<Transition> OperatorState::transition(char readCharacter, char nextCharacter) {
-    if (isNumber(nextCharacter)) {
-        return std::make_shared<DigitReadingState>(readCharacter)->getTransition();
-    } else {
-        return std::make_shared<DigitCompleteState>(std::string(1, readCharacter))->getTransition();
-    }
-}
-
 std::shared_ptr<Token> OperatorState::getToken() {
     return std::make_unique<Token>(std::string(1, symbol), TokenType::OPERATOR);
 }
 
 /* *************************************************************************************************** */
-
-void EmptyState::validate(char readCharacter, char nextCharacter) {
-    if (isOperator(readCharacter)) {
-        throw InvalidFormulaException("Invalid character found " + std::string(1, readCharacter));
-    }
-}
-
-std::shared_ptr<Transition> EmptyState::transition(char readCharacter, char nextCharacter) {
-
-    if (isNumber(nextCharacter)) {
-        return std::make_shared<DigitReadingState>(readCharacter)->getTransition();
-    } else {
-        return std::make_shared<DigitCompleteState>(std::string(1, readCharacter))->getTransition();
-    }
-}
 
 std::shared_ptr<Token> EmptyState::getToken() {
     return nullptr;

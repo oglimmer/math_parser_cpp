@@ -62,7 +62,7 @@ public:
 #define PARENTHESIS_OPEN '('
 #define PARENTHESIS_CLOSED ')'
 
-class Parenthesis : public Expression, public std::enable_shared_from_this<Number> {
+class Parenthesis : public Expression, public std::enable_shared_from_this<Parenthesis> {
 private:
     std::shared_ptr<Expression> nestedExp;
     bool closed;
