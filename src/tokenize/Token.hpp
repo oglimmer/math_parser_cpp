@@ -3,9 +3,9 @@
 #pragma once
 
 #include <string>
-#include "ast/ASTNode.hpp"
-
 #include <memory>
+
+class ASTNode;
 
 enum TokenType {
     NUMBER, OPERATOR, PARENTHESIS_OPEN, PARENTHESIS_CLOSE, CONSTANT, VARIABLE, POSTFIX_OPERATOR
@@ -20,6 +20,8 @@ public:
     Token(const std::string &data, TokenType tokenType);
 
     const std::string &getData() const;
+
+    std::string getType() const;
 
     std::shared_ptr<ASTNode> toASTNode() const;
 

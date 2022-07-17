@@ -7,6 +7,7 @@
 #include "ast/Constant.hpp"
 #include "ast/Variable.hpp"
 #include "ast/PostfixOperation.hpp"
+#include "ast/ASTNode.hpp"
 
 
 Token::Token(const std::string &data, TokenType tokenType) : data(data), tokenType(tokenType) {}
@@ -34,7 +35,7 @@ std::shared_ptr<ASTNode> Token::toASTNode() const {
     return nullptr;
 }
 
-std::string Token::toString() const {
+std::string Token::getType() const {
     std::string typeStr;
     switch (tokenType) {
         case TokenType::NUMBER:
@@ -59,6 +60,11 @@ std::string Token::toString() const {
             typeStr = "POSTFIX_OPERATOR";
             break;
     }
-    return "{type:" + typeStr + ", data:'" + data + "'}";
+    return typeStr;
 }
+
+std::string Token::toString() const {
+    return "{type:" + getType() + ", data:'" + data + "'}";
+}
+
 

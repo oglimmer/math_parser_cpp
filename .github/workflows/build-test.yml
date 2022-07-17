@@ -17,4 +17,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: false
-          tags: louis39/math_parser:latest
+          tags: oglimmer/math_parser:latest
