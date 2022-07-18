@@ -44,7 +44,8 @@ Constant::Constant(const std::string &constantName) : constantImpl(ConstantEnum:
 }
 
 std::shared_ptr<Expression> Constant::add(std::shared_ptr<ASTNode> toAdd) {
-    return std::make_shared<BinaryOperationExpression>(shared_from_this(), std::static_pointer_cast<Operation>(toAdd));
+    return ASTBuilder::getSelf()->createBinaryOperationExpression(shared_from_this(), std::static_pointer_cast<Operation>(toAdd),
+                                                                  nullptr);
 }
 
 long double Constant::resolve(std::map<std::string, long double> vars) const {

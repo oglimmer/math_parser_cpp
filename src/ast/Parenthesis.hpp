@@ -8,7 +8,7 @@
 #define PARENTHESIS_CHAR_CLOSE ')'
 
 class Parenthesis : public Expression, public std::enable_shared_from_this<Parenthesis> {
-private:
+protected:
     std::shared_ptr<Expression> nestedExp;
     bool closed;
     char c;

@@ -39,7 +39,7 @@ public:
 };
 
 class PostfixOperation : public Expression, public std::enable_shared_from_this<PostfixOperation> {
-private:
+protected:
     std::shared_ptr<Expression> nestedExp;
     PostfixOperationEnum postfixOperationImpl;
 public:

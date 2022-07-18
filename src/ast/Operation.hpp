@@ -6,7 +6,7 @@
 
 
 class Operation : public ASTNode {
-private:
+protected:
     char symbol;
     int precedence;
 public:

@@ -20,10 +20,10 @@ std::shared_ptr<Expression> BinaryOperationExpression::add(std::shared_ptr<ASTNo
     }
     if (auto toAddOp = std::dynamic_pointer_cast<Operation>(toAdd)) {
         if (op->getPrecedence() < toAddOp->getPrecedence()) {
-            return std::make_shared<BinaryOperationExpression>(op1, op, std::make_shared<BinaryOperationExpression>(
-                    op2, toAddOp));
+            auto binOp2 = ASTBuilder::getSelf()->createBinaryOperationExpression(op2, toAddOp, nullptr);
+            return ASTBuilder::getSelf()->createBinaryOperationExpression(op1, op, binOp2);
         } else {
-            return std::make_shared<BinaryOperationExpression>(shared_from_this(), toAddOp);
+            return ASTBuilder::getSelf()->createBinaryOperationExpression(shared_from_this(), toAddOp, nullptr);
         }
     } else {
         op2 = std::static_pointer_cast<Expression>(toAdd);

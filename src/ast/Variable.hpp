@@ -4,7 +4,7 @@
 #include "Expression.hpp"
 
 class Variable : public Expression, public std::enable_shared_from_this<Variable> {
-private:
+protected:
     std::string variableName;
 public:
     Variable(const std::string &variableName);

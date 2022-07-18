@@ -14,8 +14,8 @@ std::unique_ptr<std::vector<std::shared_ptr<Token>>> FunctionParser::tokenize(co
 
 std::shared_ptr<Expression>
 FunctionParser::tokensToExpression(const std::unique_ptr<std::vector<std::shared_ptr<Token>>> &tokens) const {
-    ASTBuilder astBuilder;
-    return astBuilder.tokensToExpression(*tokens);
+    auto astBuilder = ASTBuilder::getSelf();
+    return astBuilder->tokensToExpression(*tokens);
 }
 
 std::shared_ptr<Expression> FunctionParser::debugParse(const std::string &input) const {

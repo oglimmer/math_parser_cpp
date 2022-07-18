@@ -15,7 +15,7 @@ std::shared_ptr<Expression> Parenthesis::add(std::shared_ptr<ASTNode> toAdd) {
             // TODO: this must never happen. Error is actually LexicalAnalyzer.
             throw InvalidFormulaException("Missing opening (");
         }
-        return std::make_shared<BinaryOperationExpression>(shared_from_this(), toAddOp);
+        return ASTBuilder::getSelf()->createBinaryOperationExpression(shared_from_this(), toAddOp, nullptr);
     }
     if (!nestedExp) {
         nestedExp = std::static_pointer_cast<Expression>(toAdd);

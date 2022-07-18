@@ -4,7 +4,7 @@
 #include "Operation.hpp"
 
 class BinaryOperationExpression : public Expression, public std::enable_shared_from_this<BinaryOperationExpression> {
-private:
+protected:
     std::shared_ptr<Expression> op1;
     std::shared_ptr<Expression> op2;
     std::shared_ptr<Operation> op;

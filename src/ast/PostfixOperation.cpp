@@ -56,8 +56,8 @@ std::shared_ptr<Expression> PostfixOperation::add(std::shared_ptr<ASTNode> toAdd
     } else if (nestedExp->openForInput()) {
         nestedExp = nestedExp->add(toAdd);
     } else {
-        retExp = std::make_shared<BinaryOperationExpression>(shared_from_this(),
-                                                             std::static_pointer_cast<Operation>(toAdd));
+        retExp = ASTBuilder::getSelf()->createBinaryOperationExpression(shared_from_this(),
+                                                             std::static_pointer_cast<Operation>(toAdd), nullptr);
     }
     return retExp;
 }

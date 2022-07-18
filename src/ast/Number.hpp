@@ -3,7 +3,7 @@
 #include "Expression.hpp"
 
 class Number : public Expression, public std::enable_shared_from_this<Number> {
-private:
+protected:
     long double val;
 public:
     Number(long double val);

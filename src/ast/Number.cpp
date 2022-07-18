@@ -7,7 +7,8 @@ Number::Number(long double val) : val(val) {
 }
 
 std::shared_ptr<Expression> Number::add(std::shared_ptr<ASTNode> toAdd) {
-    return std::make_shared<BinaryOperationExpression>(shared_from_this(), std::static_pointer_cast<Operation>(toAdd));
+    return ASTBuilder::getSelf()->createBinaryOperationExpression(shared_from_this(), std::static_pointer_cast<Operation>(toAdd),
+                                                                  nullptr);
 }
 
 long double Number::resolve(std::map<std::string, long double> vars) const {

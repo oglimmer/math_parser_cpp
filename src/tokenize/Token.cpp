@@ -16,23 +16,8 @@ const std::string &Token::getData() const {
     return data;
 }
 
-std::shared_ptr<ASTNode> Token::toASTNode() const {
-    switch (tokenType) {
-        case TokenType::NUMBER:
-            return std::make_shared<Number>(std::stold(data));
-        case TokenType::OPERATOR:
-            return std::make_shared<Operation>(data[0]);
-        case TokenType::PARENTHESIS_OPEN:
-        case TokenType::PARENTHESIS_CLOSE:
-            return std::make_shared<Parenthesis>(data[0]);
-        case TokenType::CONSTANT:
-            return std::make_shared<Constant>(data);
-        case TokenType::VARIABLE:
-            return std::make_shared<Variable>(data);
-        case TokenType::POSTFIX_OPERATOR:
-            return std::make_shared<PostfixOperation>(data);
-    }
-    return nullptr;
+TokenType Token::getTokenType() const {
+    return tokenType;
 }
 
 std::string Token::getType() const {

@@ -7,7 +7,9 @@ Variable::Variable(const std::string &variableName) : variableName(variableName)
 }
 
 std::shared_ptr<Expression> Variable::add(std::shared_ptr<ASTNode> toAdd) {
-    return std::make_shared<BinaryOperationExpression>(shared_from_this(), std::static_pointer_cast<Operation>(toAdd));
+    return ASTBuilder::getSelf()->createBinaryOperationExpression(shared_from_this(),
+                                                                  std::static_pointer_cast<Operation>(toAdd),
+                                                                  nullptr);
 }
 
 long double Variable::resolve(std::map<std::string, long double> vars) const {

@@ -27,7 +27,7 @@ public:
 };
 
 class Constant : public Expression, public std::enable_shared_from_this<Constant> {
-private:
+protected:
     ConstantEnum constantImpl;
 public:
     Constant(const std::string &constantName);

@@ -4,13 +4,9 @@
 
 #include <string>
 #include <memory>
+#include "TokenType.hpp"
 
 class ASTNode;
-
-enum TokenType {
-    NUMBER, OPERATOR, PARENTHESIS_OPEN, PARENTHESIS_CLOSE, CONSTANT, VARIABLE, POSTFIX_OPERATOR
-};
-
 
 class Token {
 private:
@@ -22,6 +18,8 @@ public:
     const std::string &getData() const;
 
     std::string getType() const;
+
+    TokenType getTokenType() const;
 
     std::shared_ptr<ASTNode> toASTNode() const;
 
