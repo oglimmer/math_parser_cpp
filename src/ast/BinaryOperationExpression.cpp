@@ -36,6 +36,8 @@ long double BinaryOperationExpression::resolve(std::map<std::string, long double
 }
 
 std::shared_ptr<Expression> BinaryOperationExpression::simplify() {
+    op1 = op1->simplify();
+    op2 = op2->simplify();
     return shared_from_this();
 }
 

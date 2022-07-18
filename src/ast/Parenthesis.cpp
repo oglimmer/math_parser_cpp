@@ -34,7 +34,7 @@ long double Parenthesis::resolve(std::map<std::string, long double> vars) const 
 }
 
 std::shared_ptr<Expression> Parenthesis::simplify() {
-    return nestedExp;
+    return nestedExp->simplify();
 }
 
 bool Parenthesis::openForInput() const {

@@ -67,6 +67,7 @@ long double PostfixOperation::resolve(std::map<std::string, long double> vars) c
 }
 
 std::shared_ptr<Expression> PostfixOperation::simplify() {
+    nestedExp = nestedExp->simplify();
     return shared_from_this();
 }
 
@@ -79,5 +80,5 @@ void PostfixOperation::validate() const {
 }
 
 std::string PostfixOperation::toString() const {
-    return postfixOperationImpl.getName() + "(" + nestedExp->toString() + ")";
+    return postfixOperationImpl.getName() + nestedExp->toString();
 }
