@@ -1,21 +1,24 @@
 FROM debian:11-slim
 
 RUN apt update && \
-    apt install -y cmake g++ git doctest-dev
+    apt install -y cmake g++ git python3-pip && \
+    pip3 install conan
 
 COPY . /home/math_parser
 
 RUN cd /home/math_parser &&  \
     mkdir -p build &&  \
     cd build &&  \
-    rm -rf * &&  \
+    rm -rf * && \
+    conan install .. && \
     cmake .. &&  \
-    make &&  \
-    make test
+    cmake --build . &&  \
+    ctest && \
+    cmake --install .
 
 FROM debian:11-slim
 
-COPY --from=0 /home/math_parser/build/math_parser-bin /usr/bin
+COPY --from=0 /usr/local/bin/math_parser-bin /usr/local/bin
 COPY entrypoint.sh /
 
 ENTRYPOINT [ "/entrypoint.sh" ]

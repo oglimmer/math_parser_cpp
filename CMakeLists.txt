@@ -5,12 +5,9 @@ project(${project_name})
 
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(doctest REQUIRED)
-if(doctest_FOUND)
-    message(STATUS "Found doctest")
-else()
-    message(FATAL_ERROR "Could not find doctest")
-endif()
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
 
 ## lib
 
@@ -46,9 +43,7 @@ add_library(${project_name}-lib
         src/tokenize/Transition.cpp
         src/tokenize/VarCompletedState.cpp)
 
-target_link_libraries(${project_name}-lib
-        PUBLIC doctest::doctest
-        )
+target_link_libraries(${project_name}-lib CONAN_PKG::doctest)
 
 target_include_directories(${project_name}-lib PUBLIC src)
 
@@ -79,7 +74,7 @@ set_target_properties(${project_name}-lib ${project_name}-bin ${project_name}-te
         )
 
 enable_testing()
-add_test(project-tests ${project_name}-test)
+add_test(project-tests bin/${project_name}-test)
 
 install(TARGETS ${project_name}-bin DESTINATION bin)
 install(TARGETS ${project_name}-lib DESTINATION lib)
