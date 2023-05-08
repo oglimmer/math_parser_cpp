@@ -2,7 +2,7 @@ FROM debian:11-slim
 
 RUN apt update && \
     apt install -y cmake g++ git python3-pip && \
-    pip3 install conan
+    pip3 install conan==1.59
 
 COPY . /home/math_parser
 
